@@ -1,5 +1,5 @@
-import db from "@/db";
 import { categories } from "@/db/schema";
+import db from "@/db";
 
 const categoryNames = [
   "Music",
@@ -19,7 +19,7 @@ async function main() {
   try {
     const values = categoryNames.map((name) => ({
       name,
-      description: `Videoes related to ${name.toLowerCase()}`,
+      description: `Videos related to ${name.toLowerCase()}`,
     }));
 
     await db.insert(categories).values(values);
