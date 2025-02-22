@@ -133,7 +133,6 @@ export const POST = async (req: Request) => {
       if (!assetId) {
         throw new Response("No asset ID found", { status: 400 });
       }
-      console.log("Track ready");
 
       await db
         .update(videos)
