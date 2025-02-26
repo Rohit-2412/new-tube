@@ -4,7 +4,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/trpc/init";
-import { users, videoUpdateSchema, videos } from "@/db/schema";
+import { users, videoUpdateSchema, videoViews, videos } from "@/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { UTApi } from "uploadthing/server";
@@ -23,6 +23,7 @@ export const videosRouter = createTRPCRouter({
           user: {
             ...getTableColumns(users),
           },
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
