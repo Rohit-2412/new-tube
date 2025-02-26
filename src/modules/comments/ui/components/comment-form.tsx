@@ -36,7 +36,6 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
     },
     onError: (error) => {
       toast.error("Failed to add comment");
-      console.log("Error while adding comment", error);
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -53,6 +52,10 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
   });
 
   const handleSubmit = (values: z.infer<typeof commentsInsertSchema>) => {
+    if (values.value.trim().length === 0) {
+      toast.warning("Comment can't be empty");
+      return;
+    }
     create.mutate(values);
   };
 

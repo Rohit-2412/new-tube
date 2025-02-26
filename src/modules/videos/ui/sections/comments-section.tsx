@@ -2,7 +2,10 @@
 
 import { CommentForm } from "@/modules/comments/ui/components/comment-form";
 import { CommentItem } from "@/modules/comments/ui/components/comment-item";
+import { DEFAULT_LIMIT } from "@/constants";
 import { ErrorBoundary } from "react-error-boundary";
+import { InfiniteScroll } from "@/components/infinite-scroll";
+import { Loader2Icon } from "lucide-react";
 import { Suspense } from "react";
 import { trpc } from "@/trpc/client";
 
@@ -12,7 +15,7 @@ interface CommentsSectionProps {
 
 export const CommentsSection = ({ videoId }: CommentsSectionProps) => {
   return (
-    <Suspense fallback={<div>Loading comments...</div>}>
+    <Suspense fallback={<CommentSectionSkeleton />}>
       <ErrorBoundary fallback={<div>Failed to load comments</div>}>
         <CommentsSectionSuspense videoId={videoId} />
       </ErrorBoundary>
@@ -20,19 +23,46 @@ export const CommentsSection = ({ videoId }: CommentsSectionProps) => {
   );
 };
 
+const CommentSectionSkeleton = () => {
+  return (
+    <div className="mt-6 flex justify-center items-center">
+      <Loader2Icon className="text-muted-foreground size-7 animate-spin" />
+    </div>
+  );
+};
+
 const CommentsSectionSuspense = ({ videoId }: CommentsSectionProps) => {
-  const [comments] = trpc.comments.getMany.useSuspenseQuery({ videoId });
+  const [comments, query] = trpc.comments.getMany.useSuspenseInfiniteQuery(
+    {
+      videoId,
+      limit: DEFAULT_LIMIT,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
   return (
     <div className="mt-6">
       <div className="flex flex-col gap-6">
-        <h1>{comments.length} comments</h1>
+        <h1 className="text-xl font-bold">
+          {comments.pages[0].totalCount} comments
+        </h1>
         <CommentForm videoId={videoId} />
       </div>
       <div className="flex flex-col gap-4 mt-2">
-        {comments.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
+        {comments.pages
+          .flatMap((page) => page.items)
+          .map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+
+        <InfiniteScroll
+          hasNextPage={query.hasNextPage}
+          fetchNextPage={query.fetchNextPage}
+          isFetchingNextPage={query.isFetchingNextPage}
+          isManual
+        />
       </div>
     </div>
   );
