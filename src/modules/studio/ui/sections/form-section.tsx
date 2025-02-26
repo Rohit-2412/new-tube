@@ -47,7 +47,7 @@ import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import { Textarea } from "@/components/ui/textarea";
 import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
-import { VideoPlayer } from "../components/video-player";
+import { VideoPlayer } from "../../../videos/ui/components/video-player";
 import { snakeCaseToTitle } from "@/lib/utils";
 import { toast } from "sonner";
 import { trpc } from "@/trpc/client";
