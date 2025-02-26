@@ -1,10 +1,11 @@
 "use client";
 
+import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";
+import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
+
 import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 import { VideoBanner } from "../components/video-banner";
-import { VideoPlayer } from "../components/video-player";
-import { VideoTopRow } from "../components/video-top-row";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { useAuth } from "@clerk/nextjs";
@@ -15,11 +16,20 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ videoId }: VideoSectionProps) => {
   return (
-    <Suspense fallback={<div> Loading... </div>}>
-      <ErrorBoundary fallback={<div> Error </div>}>
+    <Suspense fallback={<VideoSectionSkeleton />}>
+      <ErrorBoundary fallback={<div> Something went wrong </div>}>
         <VideoSectionSuspense videoId={videoId} />
       </ErrorBoundary>
     </Suspense>
+  );
+};
+
+const VideoSectionSkeleton = () => {
+  return (
+    <>
+      <VideoPlayerSkeleton />
+      <VideoTopRowSkeleton />
+    </>
   );
 };
 
