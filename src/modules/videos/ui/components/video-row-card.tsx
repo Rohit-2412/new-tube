@@ -4,6 +4,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { VariantProps, cva } from "class-variance-authority";
+import { VideoThumbnail, VideoThumbnailSkeleton } from "./video-thumbnail";
 
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +12,6 @@ import { UserAvatar } from "@/components/user-avatar";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
 import { VideoGetManyOutput } from "@/modules/videos/types";
 import { VideoMenu } from "./video-menu";
-import { VideoThumbnail } from "./video-thumbnail";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
@@ -44,15 +44,46 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
   onRemove?: () => void;
 }
 
-export const VideoRowCardSkeleton = () => {
+export const VideoRowCardSkeleton = ({
+  size,
+}: VariantProps<typeof videoRowCardVariants>) => {
   return (
-    <div>
-      <Skeleton />
+    <div className={videoRowCardVariants({ size })}>
+      {/* thumbnail skeleton */}
+      <div className={thumbnailVariants({ size })}>
+        <VideoThumbnailSkeleton />
+      </div>
+
+      {/* info skeleton */}
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between gap-x-2">
+          <div className="flex-1 min-w-0">
+            <Skeleton
+              className={cn("h-5 w-[40%]", size === "compact" && "h-4 w-[90%]")}
+            />
+            {size === "default" && (
+              <>
+                <Skeleton className="h-4 w-[20%] mt-1" />
+                <div className="flex items-center gap-2 my-3">
+                  <Skeleton className="size-8 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </>
+            )}
+
+            {size == "compact" && <Skeleton className="mt-1 h-4 w-[50%]" />}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export const VideoRowCard = ({ size, data, onRemove }: VideoRowCardProps) => {
+export const VideoRowCard = ({
+  size = "default",
+  data,
+  onRemove,
+}: VideoRowCardProps) => {
   const compactViews = useMemo(() => {
     return Intl.NumberFormat("en-US", {
       notation: "compact",

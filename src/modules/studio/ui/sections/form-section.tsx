@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Suspense, useState } from "react";
 
+import { APP_URL } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "react-error-boundary";
 import Image from "next/image";
@@ -164,6 +165,18 @@ export const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     },
   });
 
+  const revalidate = trpc.videos.revalidate.useMutation({
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success("Video revalidated");
+    },
+
+    onError: () => {
+      toast.error("Failed to update video");
+    },
+  });
+
   const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
     onSuccess: () => {
       utils.studio.getMany.invalidate();
@@ -210,9 +223,7 @@ export const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     update.mutateAsync(data);
   };
 
-  const fullUrl = `${
-    process.env.VERCEL_URL || "http://localhost:3000"
-  }/videos/${video.id}`;
+  const fullUrl = `${APP_URL || "http://localhost:3000"}/videos/${video.id}`;
   const [isCopied, setIsCopied] = useState(false);
 
   const onCopy = async () => {
@@ -265,6 +276,11 @@ export const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     onClick={() => remove.mutate({ id: video.id })}
                   >
                     <TrashIcon className="size-4 mr-2" /> Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => revalidate.mutate({ id: video.id })}
+                  >
+                    <RotateCcwIcon className="size-4 mr-2" /> Revalidate
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
