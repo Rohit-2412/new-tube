@@ -47,8 +47,8 @@ export const MainSection = () => {
                   asChild
                   isActive={false} // change to look at current pathname
                   onClick={(e) => {
-                    e.preventDefault();
                     if (item.auth && !isSignedIn) {
+                      e.preventDefault();
                       clerk.openSignIn();
                     }
                   }}
