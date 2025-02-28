@@ -1,5 +1,6 @@
 "use client";
 
+import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,9 +8,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
+
 import Link from "next/link";
-import { useClerk, useAuth } from "@clerk/nextjs";
 
 const items = [
   {
