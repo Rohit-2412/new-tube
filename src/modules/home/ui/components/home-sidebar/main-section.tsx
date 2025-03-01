@@ -11,6 +11,7 @@ import {
 import { useAuth, useClerk } from "@clerk/nextjs";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
@@ -34,6 +35,7 @@ const items = [
 export const MainSection = () => {
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,7 +47,7 @@ export const MainSection = () => {
                 <SidebarMenuButton
                   tooltip={item.title}
                   asChild
-                  isActive={false} // change to look at current pathname
+                  isActive={pathname === item.url}
                   onClick={(e) => {
                     if (item.auth && !isSignedIn) {
                       e.preventDefault();

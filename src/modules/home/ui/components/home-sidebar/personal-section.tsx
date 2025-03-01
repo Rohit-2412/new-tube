@@ -1,5 +1,6 @@
 "use client";
 
+import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -9,8 +10,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth, useClerk } from "@clerk/nextjs";
-import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
@@ -36,6 +38,7 @@ const items = [
 export const PersonalSection = () => {
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
 
   return (
     <div className="flex flex-col gap-4">
@@ -48,10 +51,10 @@ export const PersonalSection = () => {
                 <SidebarMenuButton
                   tooltip={item.title}
                   asChild
-                  isActive={false} // change to look at current pathname
+                  isActive={pathname === item.url}
                   onClick={(e) => {
-                    e.preventDefault();
                     if (item.auth && !isSignedIn) {
+                      e.preventDefault();
                       clerk.openSignIn();
                     }
                   }}
