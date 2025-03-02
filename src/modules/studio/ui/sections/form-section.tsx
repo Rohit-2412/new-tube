@@ -398,14 +398,14 @@ export const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             >
                               <ImagePlusIcon className="size-4 mr-1" /> Change
                             </DropdownMenuItem>
-                            <DropdownMenuItem
+                            {/* <DropdownMenuItem
                               onClick={() =>
                                 setThumbnailGenerateModalOpen(true)
                               }
                             >
                               <SparklesIcon className="size-4 mr-1" /> Ai
                               Generated
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                             <DropdownMenuItem
                               onClick={() =>
                                 restoreThumbnail.mutate({ id: video.id })

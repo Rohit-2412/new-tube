@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Form,
   FormControl,
@@ -38,10 +39,10 @@ export const ThumbnailGenerateModal = ({
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    generateThumbnail.mutate({
-      prompt: values.prompt,
-      id: videoId,
-    });
+    // generateThumbnail.mutate({
+    //   prompt: values.prompt,
+    //   id: videoId,
+    // });
   };
 
   const generateThumbnail = trpc.videos.generateThumbnail.useMutation({
