@@ -43,11 +43,12 @@ export const CommentItem = ({
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [isRepliesOpen, setIsRepliesOpen] = useState(false);
 
-  const like = trpc.commentReactions.like.useMutation({
-    onSuccess: () => {
-      utils.comments.getMany.invalidate({ videoId: comment.videoId });
-    },
+  const isComment = variant === "comment";
+  const isOwner = comment.user.clerkId === userId;
 
+  const like = trpc.commentReactions.like.useMutation({
+    onSuccess: () =>
+      utils.comments.getMany.invalidate({ videoId: comment.videoId }),
     onError: (error) => {
       if (error.data?.code === "UNAUTHORIZED") {
         toast.warning("You need to sign in to like a comment");
@@ -57,10 +58,8 @@ export const CommentItem = ({
   });
 
   const dislike = trpc.commentReactions.dislike.useMutation({
-    onSuccess: () => {
-      utils.comments.getMany.invalidate({ videoId: comment.videoId });
-    },
-
+    onSuccess: () =>
+      utils.comments.getMany.invalidate({ videoId: comment.videoId }),
     onError: (error) => {
       if (error.data?.code === "UNAUTHORIZED") {
         toast.warning("You need to sign in to dislike a comment");
@@ -74,10 +73,8 @@ export const CommentItem = ({
       utils.comments.getMany.invalidate({ videoId: comment.videoId });
       toast.success("Comment deleted successfully!");
     },
-
     onError: (error) => {
       toast.error("Failed to delete comment");
-
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
       }
@@ -87,24 +84,22 @@ export const CommentItem = ({
   return (
     <div>
       <div className="flex gap-4">
-        <Link href={`/users/${comment.userId}`}>
+        <Link prefetch href={`/users/${comment.userId}`}>
           <UserAvatar
-            size={variant === "comment" ? "lg" : "sm"}
+            size={isComment ? "lg" : "sm"}
             imageUrl={comment.user.imageUrl}
             name={comment.user.name}
           />
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link href={`/users/${comment.userId}`}>
+          <Link prefetch href={`/users/${comment.userId}`}>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-sm font-medium pb-0.5">
                 {comment.user.name}
               </span>
               <span className="text-xs text-muted-foreground">
-                {formatDistanceToNow(comment.createdAt, {
-                  addSuffix: true,
-                })}
+                {formatDistanceToNow(comment.createdAt, { addSuffix: true })}
               </span>
             </div>
           </Link>
@@ -116,9 +111,7 @@ export const CommentItem = ({
                 variant="ghost"
                 size="icon"
                 disabled={like.isPending}
-                onClick={() => {
-                  like.mutate({ commentId: comment.id });
-                }}
+                onClick={() => like.mutate({ commentId: comment.id })}
               >
                 <ThumbsUpIcon
                   className={cn(
@@ -134,9 +127,7 @@ export const CommentItem = ({
                 variant="ghost"
                 size="icon"
                 disabled={dislike.isPending}
-                onClick={() => {
-                  dislike.mutate({ commentId: comment.id });
-                }}
+                onClick={() => dislike.mutate({ commentId: comment.id })}
               >
                 <ThumbsDownIcon
                   className={cn(
@@ -148,74 +139,65 @@ export const CommentItem = ({
                 {comment.dislikeCount}
               </span>
             </div>
-            {variant === "comment" && (
+
+            {isComment && (
               <Button
-                size={"sm"}
-                variant={"ghost"}
+                size="sm"
+                variant="ghost"
                 className="h-8"
-                onClick={() => {
-                  setIsReplyOpen(true);
-                }}
+                onClick={() => setIsReplyOpen(true)}
               >
                 Reply
               </Button>
             )}
           </div>
         </div>
-        {comment.user.clerkId !== userId && variant === "comment" && (
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreVerticalIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => {
-                  setIsReplyOpen(true);
-                }}
-              >
-                <MessageSquareIcon className="size-4" /> Reply
-              </DropdownMenuItem>
 
-              {comment.user.clerkId === userId && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    remove.mutate({ id: comment.id });
-                  }}
-                >
-                  <Trash2Icon className="size-4" /> Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8">
+              <MoreVerticalIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {/* Enable "Reply" for everyone */}
+            <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
+              <MessageSquareIcon className="size-4" /> Reply
+            </DropdownMenuItem>
+
+            {/* Show "Delete" only for the owner */}
+            {isOwner && (
+              <DropdownMenuItem
+                onClick={() => remove.mutate({ id: comment.id })}
+              >
+                <Trash2Icon className="size-4" /> Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {isReplyOpen && variant === "comment" && (
+      {isReplyOpen && (
         <div className="mt-4 pl-14">
           <CommentForm
             variant="reply"
-            parentId={comment.id}
+            parentId={comment.parentId || comment.id}
             videoId={comment.videoId}
             onSuccess={() => {
               setIsReplyOpen(false);
               setIsRepliesOpen(true);
             }}
-            onCancel={() => {
-              setIsReplyOpen(false);
-            }}
+            onCancel={() => setIsReplyOpen(false)}
           />
         </div>
       )}
-      {comment.replyCount > 0 && variant === "comment" && (
+
+      {isComment && comment.replyCount > 0 && (
         <div className="mt-4 pl-14">
           <Button
             variant="tertiary"
             size="sm"
-            onClick={() => {
-              setIsRepliesOpen((current) => !current);
-            }}
+            onClick={() => setIsRepliesOpen((prev) => !prev)}
           >
             {isRepliesOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
             {comment.replyCount}{" "}
@@ -223,7 +205,8 @@ export const CommentItem = ({
           </Button>
         </div>
       )}
-      {comment.replyCount > 0 && isRepliesOpen && variant === "comment" && (
+
+      {isComment && isRepliesOpen && comment.replyCount > 0 && (
         <CommentReplies parentId={comment.id} videoId={comment.videoId} />
       )}
     </div>
